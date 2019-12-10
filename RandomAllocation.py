@@ -41,7 +41,7 @@ def search_neighbours(array, pos_array):
 
     # new cluster
     if number_of_neighbours == 0:
-        cluster_count[0] = cluster_count[0] + 1
+        cluster_count[0] += 1
         assign_clusters(array, origin)
 
     # connect cluster to one neighbour
@@ -117,7 +117,5 @@ if __name__ == "__main__":
         pos = rand_pos()
         search_neighbours(lattice, pos)
 
-    # TODO: fix cluster count, too high
-    print(np.sum(lattice))
     plt.imshow(lattice)
     plt.show()
