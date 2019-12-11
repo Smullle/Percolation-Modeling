@@ -8,11 +8,10 @@ import matplotlib.pyplot as plt
 import random
 
 SEED = random.seed(1)
-SIZE = 50
+SIZE = 10
+
 
 # rules for labeling
-
-
 def search_neighbours(array, pos_array):
     origin = pos_array[0]
     n = pos_array[1]
@@ -50,8 +49,7 @@ def search_neighbours(array, pos_array):
 
     # bridge clusters
     if number_of_neighbours == 2:
-        bridge_clusters(array, neighbours)
-        # TODO: implement bridging
+        bridge_clusters(array, neighbours, origin)
 
 
 def assign_clusters(array, loc):
@@ -65,8 +63,19 @@ def connect_to_cluster(array, loc, origin):
             array[np.split(origin, 2)] = array[np.split(neighbour, 2)]
 
 
-def bridge_clusters(array, loc):
-    return 0
+def bridge_clusters(array, loc, origin):
+    smallest = array[np.split(loc[0], 2)]
+    for neighbour in loc[1:]:
+        if array[np.split(neighbour, 2)] == smallest:
+            array[np.split(origin, 2)] = array[np.split(neighbour, 2)]
+        elif array[np.split(neighbour, 2)] < smallest:
+            smallest = array[np.split(neighbour, 2)]
+
+    # overwrite lattice with smallest neighbor where point in lattice contains a neighbour
+    for row in array:
+        for element in row:
+            if element == (array[np.split(neighbour, 2)] for neighbour in loc):
+                array[row, element] = array[np.split(neighbour, 2)]
 
 
 # obtain random pos in lattice
@@ -74,8 +83,8 @@ def rand_pos():
     origin = np.empty(2)
     n, s, w, e = np.empty(2), np.empty(2), np.empty(2), np.empty(2)
 
-    pos_x = random.randint(0, SIZE-1)
-    pos_y = random.randint(0, SIZE-1)
+    pos_x = random.randint(0, SIZE - 1)
+    pos_y = random.randint(0, SIZE - 1)
 
     origin[0] = pos_x
     origin[1] = pos_y
@@ -87,24 +96,35 @@ def rand_pos():
         n[1] = pos_y + 1
 
     s[0] = pos_x
-    if pos_y - 1 <= 0:
-        s[1] = 0
+    if pos_y - 1 < 0:
+        s[1] = pos_y
     else:
         s[1] = pos_y - 1
 
-    if pos_x - 1 <= 0:
-        w[0] = 0
+    if pos_x - 1 < 0:
+        w[0] = pos_x
     else:
         w[0] = pos_x - 1
     w[1] = pos_y
 
     if pos_x + 1 >= SIZE:
-        e[0] = 0
+        e[0] = pos_x
     else:
         e[0] = pos_x + 1
     e[1] = pos_x
 
     return np.array([origin.astype(int), n.astype(int), s.astype(int), w.astype(int), e.astype(int)])
+
+
+def common_cluster(array):
+    # TODO: check edges of 2d array for common cluster
+    north_side = array[0]
+    south_side = array[SIZE - 1]
+    west_side = array[0]
+    east_side = array[SIZE - 1]
+
+    if (north_side == south_side == west_side == east_side) and north_side != 0:
+        return True
 
 
 if __name__ == "__main__":
@@ -113,7 +133,7 @@ if __name__ == "__main__":
     lattice = np.zeros((SIZE, SIZE))
     plt.imshow(lattice)
 
-    for i in range(1000):
+    while common_cluster(lattice) != True:
         pos = rand_pos()
         search_neighbours(lattice, pos)
 
