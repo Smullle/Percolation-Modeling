@@ -14,42 +14,45 @@ SIZE = 10
 # rules for labeling
 def search_neighbours(array, pos_array):
     origin = pos_array[0]
-    n = pos_array[1]
-    s = pos_array[2]
-    w = pos_array[3]
-    e = pos_array[4]
 
-    n_val = array[np.split(n, 2)]
-    s_val = array[np.split(s, 2)]
-    w_val = array[np.split(w, 2)]
-    e_val = array[np.split(e, 2)]
+    # check if point has been already found
+    if array[np.split(origin, 2)] == 0:
+        n = pos_array[1]
+        s = pos_array[2]
+        w = pos_array[3]
+        e = pos_array[4]
 
-    neighbours = []
-    if n_val:
-        neighbours.append(n)
-    if s_val:
-        neighbours.append(s)
-    if w_val:
-        neighbours.append(w)
-    if e_val:
-        neighbours.append(e)
+        n_val = array[np.split(n, 2)]
+        s_val = array[np.split(s, 2)]
+        w_val = array[np.split(w, 2)]
+        e_val = array[np.split(e, 2)]
 
-    neighbours = np.asarray(neighbours)
+        neighbours = []
+        if n_val:
+            neighbours.append(n)
+        if s_val:
+            neighbours.append(s)
+        if w_val:
+            neighbours.append(w)
+        if e_val:
+            neighbours.append(e)
 
-    number_of_neighbours = np.count_nonzero(neighbours)
+        neighbours = np.asarray(neighbours)
 
-    # new cluster
-    if number_of_neighbours == 0:
-        cluster_count[0] += 1
-        assign_clusters(array, origin)
+        number_of_neighbours = np.count_nonzero(neighbours)
 
-    # connect cluster to one neighbour
-    if number_of_neighbours == 1:
-        connect_to_cluster(array, neighbours, origin)
+        # new cluster
+        if number_of_neighbours == 0:
+            cluster_count[0] += 1
+            assign_clusters(array, origin)
 
-    # bridge clusters
-    if number_of_neighbours == 2:
-        bridge_clusters(array, neighbours, origin)
+        # connect cluster to one neighbour
+        if number_of_neighbours == 1:
+            connect_to_cluster(array, neighbours, origin)
+
+        # bridge clusters
+        if number_of_neighbours == 2:
+            bridge_clusters(array, neighbours, origin)
 
 
 def assign_clusters(array, loc):
@@ -133,7 +136,7 @@ if __name__ == "__main__":
     lattice = np.zeros((SIZE, SIZE))
     plt.imshow(lattice)
 
-    while common_cluster(lattice) != True:
+    while not common_cluster(lattice):
         pos = rand_pos()
         search_neighbours(lattice, pos)
 
