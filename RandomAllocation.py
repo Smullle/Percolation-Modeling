@@ -158,7 +158,7 @@ if __name__ == "__main__":
     cluster_count = np.array([0])
     lattice = np.zeros((SIZE, SIZE))
     lattice = lattice.astype(int)
-    plt.imshow(lattice)
+    # plt.imshow(lattice)
 
     while not common_cluster(lattice):
         pos = rand_pos()
