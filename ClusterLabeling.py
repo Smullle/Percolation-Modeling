@@ -143,22 +143,27 @@ def common_cluster(lattice_object):
     west_side = lattice_object.get_edges()[2]
     east_side = lattice_object.get_edges()[3]
 
-    # TODO: edge matching not working
-
     common0 = np.intersect1d(north_side, south_side)
     common1 = np.intersect1d(common0, west_side)
     common = np.intersect1d(common1, east_side)
 
-    if common.size >= 2:
+    if common.size >= 1 and common[0] != 0:
         return True
 
 
 if __name__ == "__main__":
-    lattice = Lattice(10)
+    lattice = Lattice(30)
 
+    run = 0
     while not common_cluster(lattice):
         pos = rand_pos(len(lattice.get_lattice()))
         search_neighbours(lattice, pos)
+        run += 1
+
+        # if run % 100 == 0:
+        #     print(lattice.get_lattice())
+        #     plt.imshow(lattice.get_lattice())
+        #     plt.show()
 
     print(lattice.get_lattice())
     plt.imshow(lattice.get_lattice())
