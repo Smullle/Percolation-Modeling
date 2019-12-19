@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-
 SEED = random.seed(a=None)  # seed used for testing (remove randomness)
 
 
@@ -18,49 +17,49 @@ def search_neighbours(lattice_object, pos_array):
     """
     origin = pos_array[0]
     # check if point has been already found
-    # if array[origin[0]][origin[1]] == 0:
-    n = pos_array[1]
-    s = pos_array[2]
-    w = pos_array[3]
-    e = pos_array[4]
+    if lattice_object.get_lattice()[origin[0]][origin[1]] == 0:
+        n = pos_array[1]
+        s = pos_array[2]
+        w = pos_array[3]
+        e = pos_array[4]
 
-    n_val = lattice_object.get_lattice()[n[0]][n[1]]
-    s_val = lattice_object.get_lattice()[s[0]][s[1]]
-    w_val = lattice_object.get_lattice()[w[0]][w[1]]
-    e_val = lattice_object.get_lattice()[e[0]][e[1]]
+        n_val = lattice_object.get_lattice()[n[0]][n[1]]
+        s_val = lattice_object.get_lattice()[s[0]][s[1]]
+        w_val = lattice_object.get_lattice()[w[0]][w[1]]
+        e_val = lattice_object.get_lattice()[e[0]][e[1]]
 
-    # print("assigning..", origin)
-    # print(n, s, w, e)
-    # print(n_val, s_val, w_val, e_val)
+        # print("assigning..", origin)
+        # print(n, s, w, e)
+        # print(n_val, s_val, w_val, e_val)
 
-    neighbours = []
-    if n_val:
-        neighbours.append(n)
-    if s_val:
-        neighbours.append(s)
-    if w_val:
-        neighbours.append(w)
-    if e_val:
-        neighbours.append(e)
+        neighbours = []
+        if n_val:
+            neighbours.append(n)
+        if s_val:
+            neighbours.append(s)
+        if w_val:
+            neighbours.append(w)
+        if e_val:
+            neighbours.append(e)
 
-    neighbours = np.asarray(neighbours)
+        neighbours = np.asarray(neighbours)
 
-    number_of_neighbours = np.count_nonzero(neighbours)
+        number_of_neighbours = np.count_nonzero(neighbours)
 
-    # new cluster
-    if number_of_neighbours == 0:
-        lattice_object.update_cluster_count()
-        assign_clusters(lattice_object, origin)
+        # new cluster
+        if number_of_neighbours == 0:
+            lattice_object.update_cluster_count()
+            assign_clusters(lattice_object, origin)
 
-    # connect cluster to one neighbour
-    elif number_of_neighbours == 1:
-        connect_to_cluster(lattice_object, neighbours, origin)
+        # connect cluster to one neighbour
+        elif number_of_neighbours == 1:
+            connect_to_cluster(lattice_object, neighbours, origin)
 
-    # bridge clusters
-    elif number_of_neighbours >= 2:
-        bridge_clusters(lattice_object, neighbours, origin)
-    else:
-        print("I should not be here, number of neighbours: ", number_of_neighbours)
+        # bridge clusters
+        elif number_of_neighbours >= 2:
+            bridge_clusters(lattice_object, neighbours, origin)
+        else:
+            print("I should not be here, number of neighbours: ", number_of_neighbours)
 
 
 def assign_clusters(lattice_object, loc):
@@ -74,22 +73,26 @@ def assign_clusters(lattice_object, loc):
 def connect_to_cluster(lattice_object, loc, origin):
     for neighbour in loc:
         if neighbour[0] or neighbour[1]:
-            lattice_object.get_lattice()[origin[0]][origin[1]] = lattice_object.get_lattice()[neighbour[0]][neighbour[1]]
+            lattice_object.get_lattice()[origin[0]][origin[1]] = lattice_object.get_lattice()[neighbour[0]][
+                neighbour[1]]
 
 
 def bridge_clusters(lattice_object, loc, origin):
-    smallest = lattice_object.get_lattice()[loc[0][0]][loc[0][1]]
-    for neighbour in loc[1:]:
+    smallest = lattice_object.get_size() ** 2  # set smallest value to high
+    for neighbour in loc:
         if lattice_object.get_lattice()[neighbour[0]][neighbour[1]] <= smallest:
             smallest = lattice_object.get_lattice()[neighbour[0]][neighbour[1]]
 
     lattice_object.get_lattice()[origin[0]][origin[1]] = smallest
 
     # overwrite lattice with smallest neighbor where point in lattice contains a neighbour
-    for row in lattice_object.get_lattice():
-        for element in row:
-            if element == (lattice_object.get_lattice()[neighbour[0]][neighbour[1]] for neighbour in loc):
-                lattice_object.get_lattice()[row, element] = smallest
+    for row in range(lattice_object.get_size()):
+        for col in range(lattice_object.get_size()):
+            for neighbour in loc:
+                if lattice_object.get_lattice()[row][col] == (lattice_object.get_lattice()[neighbour[0]][neighbour[1]]):
+                    lattice_object.get_lattice()[row][col] = smallest
+
+    # lattice_object.reduce_cluster_count(len(loc))
 
 
 # obtain random pos in lattice
@@ -152,19 +155,18 @@ def common_cluster(lattice_object):
 
 
 if __name__ == "__main__":
-    lattice = Lattice(30)
+    lattice = Lattice(10)
 
-    run = 0
     while not common_cluster(lattice):
         pos = rand_pos(len(lattice.get_lattice()))
         search_neighbours(lattice, pos)
-        run += 1
-
-        # if run % 100 == 0:
-        #     print(lattice.get_lattice())
-        #     plt.imshow(lattice.get_lattice())
-        #     plt.show()
+        if lattice.filled():
+            print("No spanning cluster found")
+            break
 
     print(lattice.get_lattice())
-    plt.imshow(lattice.get_lattice())
+    print(lattice.perc_value())
+    plt.imshow(lattice.get_lattice(), cmap='gray', vmin=0, vmax=1)
+    plt.colorbar()
+    plt.title("p = " + str(lattice.perc_value()))
     plt.show()
