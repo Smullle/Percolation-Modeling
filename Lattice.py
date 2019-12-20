@@ -15,7 +15,7 @@ class Lattice:
         self.east_side = np.empty(self.size)
 
     def get_size(self):
-        return self.size
+        return len(self.lattice)
 
     def get_lattice(self):
         return self.lattice
@@ -39,9 +39,6 @@ class Lattice:
 
         return [self.north_side, self.south_side, self.west_side, self. east_side]
 
-    def set_lattice(self, array2d):
-        self.lattice = np.copy(array2d)
-
     def filled(self):
         zero_count = 0
         for row in self.lattice:
@@ -54,9 +51,9 @@ class Lattice:
             return False
 
     def perc_value(self):
-        zero_count = 0
+        cluster_count = 0
         for row in self.lattice:
             for element in row:
-                if element != 0:
-                    zero_count += 1
-        return zero_count / (self.size * self.size)
+                if element == 0:
+                    cluster_count += 1
+        return ((self.size * self.size) - cluster_count) / (self.size * self.size)
