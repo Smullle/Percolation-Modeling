@@ -29,10 +29,7 @@ def search_neighbours(lattice_object, pos_array):
         w_val = lattice_object.get_lattice()[w[0]][w[1]]
         e_val = lattice_object.get_lattice()[e[0]][e[1]]
 
-        # print("assigning..", origin)
-        # print(n, s, w, e)
-        # print(n_val, s_val, w_val, e_val)
-
+        # obtain neighbours that are not 0 or off edge of lattice
         neighbours = []
         neighbours_val = []
         if n_val != 0 and n_val != origin_val:
@@ -51,8 +48,6 @@ def search_neighbours(lattice_object, pos_array):
         neighbours = np.asarray(neighbours)
 
         number_of_neighbours = len(neighbours_val)
-
-        # print("num", number_of_neighbours)
 
         # new cluster
         if number_of_neighbours == 0:
@@ -79,6 +74,9 @@ def assign_clusters(lattice_object, loc):
 
 
 def connect_to_cluster(lattice_object, loc, origin):
+    """
+    Takes lattice object, neighbour array and origin point, will combine origin to cluster
+    """
     for neighbour in loc:
         # print(neighbour)
         # print(lattice_object.get_lattice()[neighbour[0]][neighbour[1]])
@@ -88,6 +86,10 @@ def connect_to_cluster(lattice_object, loc, origin):
 
 
 def bridge_clusters(lattice_object, loc, origin):
+    """
+    Takes lattice object neighbour values and origin, will find smallest value in neighbours and by looping through
+    lattice will set any neighbouring clusters to match smallest valued cluster
+    """
     smallest = loc[0]  # set smallest value to high
     for neighbour in loc:
         if neighbour <= smallest:
@@ -122,25 +124,25 @@ def rand_pos(size):
 
     n[1] = col
     if row - 1 < 0:
-        n[0] = row
+        n[0] = row  # set to origin if neighbour off edge
     else:
         n[0] = row - 1
 
     s[1] = col
     if row + 1 >= size:
-        s[0] = row
+        s[0] = row  # set to origin if neighbour off edge
     else:
         s[0] = row + 1
 
     w[0] = row
     if col - 1 < 0:
-        w[1] = col
+        w[1] = col  # set to origin if neighbour off edge
     else:
         w[1] = col - 1
 
     e[0] = row
     if col + 1 >= size:
-        e[1] = col
+        e[1] = col  # set to origin if neighbour off edge
     else:
         e[1] = col + 1
 
@@ -160,6 +162,7 @@ def common_cluster(lattice_object):
     common1 = np.intersect1d(common0, west_side)
     common = np.intersect1d(common1, east_side)
 
+    # 0 will always be common on 4 sides at start
     if common.size == 1 and common[0] == 0:
         return False
     else:
@@ -167,10 +170,13 @@ def common_cluster(lattice_object):
 
 
 def avg_pc(runs):
+    """
+    Given specified number of runs will calculate an average pc value on 50x50 lattice
+    """
     pc = []
 
     for i in range(runs):
-        lat10 = Lattice(20)
+        lat10 = Lattice(50)
 
         while not common_cluster(lat10):
             pos1 = rand_pos(len(lat10.get_lattice()))
@@ -186,19 +192,23 @@ def avg_pc(runs):
 
 if __name__ == "__main__":
 
-    # print("Average pc value: ", avg_pc(100))
+    # used for obtaining an average pc
+    print("Average pc value: ", avg_pc(1000))
 
-    lattice = Lattice(50)
-    error = False
+    # create lattice with specified size
+    lattice = Lattice(10)
+
+    error = False  # used if not span is found
     while not common_cluster(lattice):
-        pos = rand_pos(len(lattice.get_lattice()))
-        search_neighbours(lattice, pos)
-        # print(lattice.get_lattice())
+        pos = rand_pos(len(lattice.get_lattice()))  # get random position
+        search_neighbours(lattice, pos)  # pass neighbours to cluster assignment
+        # precautionary measure
         if lattice.filled():
             print("Error: No spanning cluster found")
             error = True
             break
 
+    # displaying of results
     if not error:
         print(lattice.get_lattice())
         print(lattice.perc_value())
