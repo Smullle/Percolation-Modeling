@@ -6,3 +6,5 @@ Percolation modelling encompasses a large area of physics from fluid flow to ele
 The aim of this project was to model percolation on a square lattice and determine if a spanning cluster exists and calculate the percolation threshold. 
 
 *Part of EP408 computational physics project.*
+
+![Images from slides](percolation.pdf?raw=true)
